@@ -19,7 +19,7 @@
      ============================================================ -->
 
 <script>
-const APP_VERSION = "2026-06-30-v4-sons";
+const APP_VERSION = "2026-06-30-v8-qr-api";
 const FB_URL = "https://dga-dei-juin-default-rtdb.europe-west1.firebasedatabase.app";
 const SESSION = "medef-nouvelle-economie";
 const BASE = `/sessions/${SESSION}`;
@@ -262,19 +262,32 @@ button{font-family:inherit;cursor:pointer;border:0}
 .answer-feedback .score-line{font-size:20px;color:var(--orange);font-weight:800;margin:8px 0}
 .answer-feedback .info{color:var(--grey);font-size:14px;margin:8px 0;line-height:1.4}
 
-/* Bascule flottante anim/proj */
-.mode-toggle{
-  position:fixed;top:14px;left:14px;z-index:100;
-  background:#fff;border:2px solid var(--navy);border-radius:30px;
-  padding:6px;display:flex;gap:4px;box-shadow:0 6px 16px rgba(0,45,105,.2)
+/* Barre de contrôle Séverine (flottante en bas) */
+.ctrl-bar{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  z-index:100;
+  background:rgba(0,45,105,.92);color:#fff;border-radius:30px;
+  padding:8px 14px;
+  display:flex;gap:10px;align-items:center;
+  box-shadow:0 12px 30px rgba(0,45,105,.35);
+  max-width:90vw;flex-wrap:wrap;justify-content:center;
+  backdrop-filter:blur(10px)
 }
-.mode-toggle button{
-  padding:8px 16px;border-radius:22px;font-size:13px;font-weight:800;
-  background:transparent;color:var(--navy);cursor:pointer;letter-spacing:.5px
+.ctrl-bar .ctrl-msg{
+  color:#FFE8C8;font-size:13px;font-style:italic;padding:0 6px;
+  max-width:280px;line-height:1.3
 }
-.mode-toggle button.active{
-  background:var(--orange);color:#fff
+.ctrl-bar .ctrl-btn{
+  background:var(--orange);color:#fff;
+  padding:12px 22px;border-radius:24px;font-size:14px;font-weight:700;letter-spacing:.3px;
+  cursor:pointer;transition:transform .1s, box-shadow .15s, opacity .2s, background .15s
 }
+.ctrl-bar .ctrl-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 14px rgba(255,102,0,.4)}
+.ctrl-bar .ctrl-btn:disabled{opacity:.4;cursor:not-allowed}
+.ctrl-bar .ctrl-btn.secondary{background:transparent;border:1.5px solid #fff;color:#fff}
+.ctrl-bar .ctrl-btn.small{padding:8px 12px;font-size:14px}
+.ctrl-bar .ctrl-btn.danger{background:var(--red);font-size:11px;padding:8px 14px}
+.ctrl-bar.hidden{display:none}
 
 /* ============================================================
    ANIMATEUR
@@ -446,6 +459,65 @@ button{font-family:inherit;cursor:pointer;border:0}
 }
 
 .results-2col{display:grid;grid-template-columns:1fr 1fr;gap:30px;max-width:1300px;margin:0 auto}
+
+/* Stats par réponse */
+.answers-stats{display:flex;flex-direction:column;gap:10px;max-width:1100px;margin:20px auto 0}
+.ans-row{
+  display:flex;align-items:center;gap:14px;
+  background:#fff;border:2px solid #EBE0CB;border-radius:14px;
+  padding:12px 18px;position:relative;
+  transition:transform .2s, box-shadow .2s
+}
+.ans-row.correct{
+  border-color:var(--green);border-width:3px;
+  box-shadow:0 8px 22px rgba(31,138,76,.25);
+  background:linear-gradient(135deg, #E8F5EC 0%, #F4FAF6 100%);
+  transform:scale(1.02)
+}
+.ans-row.correct::after{
+  content:"";position:absolute;top:-3px;left:-3px;right:-3px;bottom:-3px;
+  border:4px solid var(--green);border-radius:17px;
+  pointer-events:none;
+  animation:correctPulse 1.5s ease-out infinite
+}
+@keyframes correctPulse{
+  0%{opacity:1;transform:scale(1)}
+  50%{opacity:.5;transform:scale(1.015)}
+  100%{opacity:1;transform:scale(1)}
+}
+.ans-letter{
+  width:48px;height:48px;border-radius:50%;
+  background:var(--orange);color:#fff;
+  font-size:22px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;position:relative
+}
+.ans-row.correct .ans-letter{background:var(--green)}
+.ans-letter .ans-check{
+  position:absolute;top:-6px;right:-6px;
+  width:24px;height:24px;border-radius:50%;
+  background:#fff;color:var(--green);font-size:14px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--green);
+  box-shadow:0 2px 4px rgba(0,0,0,.15)
+}
+.ans-content{flex:1;min-width:0}
+.ans-text{color:var(--navy);font-size:18px;font-weight:700;margin-bottom:6px}
+.ans-row.correct .ans-text{color:var(--green)}
+.ans-bar-wrap{
+  height:10px;background:#F4ECD9;border-radius:6px;overflow:hidden
+}
+.ans-bar{
+  height:100%;background:linear-gradient(90deg, var(--orange) 0%, #FFA060 100%);
+  border-radius:6px;transition:width .8s cubic-bezier(.2,.7,.3,1)
+}
+.ans-row.correct .ans-bar{background:linear-gradient(90deg, var(--green) 0%, #4FB874 100%)}
+.ans-stat{
+  text-align:right;min-width:90px;
+  display:flex;flex-direction:column;line-height:1.2
+}
+.ans-stat b{color:var(--navy);font-size:24px;font-family:"Playfair Display",serif;font-style:italic}
+.ans-stat span{color:var(--grey-l);font-size:11px;font-style:italic}
 @media (max-width:920px){.results-2col{grid-template-columns:1fr}}
 
 .end-screen{text-align:center;padding:60px 20px;color:var(--navy)}
@@ -455,48 +527,6 @@ button{font-family:inherit;cursor:pointer;border:0}
 </head>
 <body>
 
-<!-- Bascule animateur / projection (visible uniquement pour Séverine) -->
-<div id="mode-toggle" class="mode-toggle hidden">
-  <button id="toggle-anim" class="active">ANIMATION</button>
-  <button id="toggle-proj">PROJECTION</button>
-</div>
-
-<!-- ============================================================
-     VUE ANIMATEUR (par défaut)
-============================================================ -->
-<div id="anim-view" class="hidden">
-  <div class="anim-wrap">
-    <div class="anim-header">
-      <div>
-        <h1>Quiz Nouvelle Économie</h1>
-        <div class="who">Animation : Séverine NIRLO  ·  MEDEF Réunion</div>
-      </div>
-      <button class="btn btn-danger" id="reset-btn">RAZ session</button>
-    </div>
-
-    <div class="anim-grid">
-      <div class="panel qr-box">
-        <h3>QR code à projeter</h3>
-        <canvas id="anim-qr" width="240" height="240"></canvas>
-        <div class="url" id="anim-url"></div>
-        <div style="margin-top:14px;color:var(--grey);font-size:13px">Ou : <b id="anim-url-short" style="color:var(--orange)"></b></div>
-      </div>
-
-      <div class="panel">
-        <h3>Joueurs connectés (<span id="anim-pcount">0</span>)</h3>
-        <div class="players-list" id="anim-players"></div>
-        <div style="margin-top:14px;font-size:13px;color:var(--grey-l);font-style:italic" id="anim-status">En attente des joueurs…</div>
-      </div>
-    </div>
-
-    <div class="panel" style="margin-top:20px">
-      <h3>Pilotage du quiz</h3>
-      <div id="anim-phase-content">
-        <div style="padding:14px;color:var(--grey-l);font-style:italic">Chargement…</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- ============================================================
      VUE JOUEUR
@@ -521,7 +551,7 @@ button{font-family:inherit;cursor:pointer;border:0}
     <div class="proj-header">
       <div>
         <h1>Quiz Nouvelle Économie</h1>
-        <div class="sub">MEDEF Réunion · 18 juin 2026</div>
+        <div class="sub">MEDEF Réunion · animé par Séverine NIRLO</div>
       </div>
       <div class="proj-qr">
         <div class="lbl">REJOINDRE</div>
@@ -532,6 +562,8 @@ button{font-family:inherit;cursor:pointer;border:0}
     </div>
     <div id="proj-content"><!-- géré par JS --></div>
   </div>
+  <!-- Barre de contrôle Séverine, intégrée dans la projection -->
+  <div id="ctrl-bar" class="ctrl-bar"></div>
 </div>
 
 <script>
@@ -569,45 +601,17 @@ async function fbDelete(path) {
 }
 
 // ============================================================
-// ROUTAGE
+// ROUTAGE — une seule vue : projection (avec contrôles intégrés pour Séverine)
 // ============================================================
-let currentMode = "anim"; // "anim" ou "proj" (uniquement pour Séverine)
-let animatorInited = false;
-let projectionInited = false;
-
-function showMode(m) {
-  currentMode = m;
-  localStorage.setItem("quiz.mode", m);
-  document.getElementById("toggle-anim").classList.toggle("active", m === "anim");
-  document.getElementById("toggle-proj").classList.toggle("active", m === "proj");
-  document.getElementById("anim-view").classList.toggle("hidden", m !== "anim");
-  document.getElementById("proj-view").classList.toggle("hidden", m !== "proj");
-  if (m === "anim" && !animatorInited) { animatorInited = true; initAnimator(); }
-  if (m === "proj" && !projectionInited) { projectionInited = true; initProjection(); }
-}
-
-const route = (location.hash || "#anim").replace("#","");
+const route = (location.hash || "").replace("#","");
 
 if (route === "play") {
   document.getElementById("play-view").classList.remove("hidden");
   initPlayer();
-} else if (route === "proj") {
-  // Mode projection direct (utilisé par lien dédié si besoin)
+} else {
+  // Par défaut : vue projection unifiée (Séverine voit les contrôles intégrés)
   document.getElementById("proj-view").classList.remove("hidden");
   initProjection();
-} else {
-  // Mode animateur : Séverine peut basculer entre les 2 avec le toggle
-  document.getElementById("mode-toggle").classList.remove("hidden");
-  showMode(localStorage.getItem("quiz.mode") || "anim");
-
-  document.getElementById("toggle-anim").addEventListener("click", () => showMode("anim"));
-  document.getElementById("toggle-proj").addEventListener("click", () => showMode("proj"));
-
-  // Raccourci clavier "P" pour basculer rapidement
-  document.addEventListener("keydown", (e) => {
-    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-    if (e.key === "p" || e.key === "P") showMode(currentMode === "anim" ? "proj" : "anim");
-  });
 }
 
 // ============================================================
@@ -676,49 +680,31 @@ function playFinalBuzz() {
   }
 }
 
-function playApplause() {
+function playPodiumBips() {
   const ctx = ensureAudio();
   if (!ctx || !audioUnlocked) return;
-  // Anti-spam : pas 2 fois en 5 sec
   const now = Date.now();
-  if (now - lastAppraudissementsAt < 5000) return;
+  if (now - lastAppraudissementsAt < 1500) return;
   lastAppraudissementsAt = now;
-  // Bruit blanc filtré + claps individuels
-  const duration = 3.5;
   const t0 = ctx.currentTime;
-  // Fond : bruit blanc filtré (foule)
-  const bufSize = ctx.sampleRate * duration;
-  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
-  const noise = ctx.createBufferSource();
-  noise.buffer = buf;
-  const bp = ctx.createBiquadFilter();
-  bp.type = "bandpass"; bp.frequency.value = 1800; bp.Q.value = 0.5;
-  const ng = ctx.createGain();
-  ng.gain.setValueAtTime(0, t0);
-  ng.gain.linearRampToValueAtTime(0.35, t0 + 0.15);
-  ng.gain.linearRampToValueAtTime(0.30, t0 + 2.0);
-  ng.gain.linearRampToValueAtTime(0, t0 + duration);
-  noise.connect(bp); bp.connect(ng); ng.connect(ctx.destination);
-  noise.start(t0); noise.stop(t0 + duration);
-  // Claps individuels (40 bursts aléatoires) pour piquer
-  for (let i = 0; i < 40; i++) {
-    const tc = t0 + Math.random() * (duration - 0.3);
-    const cbufSize = Math.floor(ctx.sampleRate * 0.08);
-    const cbuf = ctx.createBuffer(1, cbufSize, ctx.sampleRate);
-    const cd = cbuf.getChannelData(0);
-    for (let j = 0; j < cbufSize; j++) cd[j] = (Math.random() * 2 - 1) * Math.exp(-j / (ctx.sampleRate * 0.015));
-    const cn = ctx.createBufferSource();
-    cn.buffer = cbuf;
-    const chp = ctx.createBiquadFilter();
-    chp.type = "highpass"; chp.frequency.value = 1000;
-    const cg = ctx.createGain();
-    cg.gain.value = 0.25 + Math.random() * 0.15;
-    cn.connect(chp); chp.connect(cg); cg.connect(ctx.destination);
-    cn.start(tc); cn.stop(tc + 0.1);
-  }
+  // 3 bips clairs façon "ding-ding-DING" qui montent
+  const freqs = [880, 1108.73, 1318.51]; // La5 - Do#6 - Mi6 (accord majeur)
+  freqs.forEach((f, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = f;
+    const start = t0 + i * 0.22;
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(i === 2 ? 0.28 : 0.20, start + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + (i === 2 ? 0.45 : 0.25));
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(start);
+    osc.stop(start + (i === 2 ? 0.5 : 0.3));
+  });
 }
+// Compat : alias pour les anciens appels
+const playApplause = playPodiumBips;
 
 // Débloquer l'audio sur n'importe quelle interaction
 document.addEventListener("click", unlockAudio, { once: false });
@@ -738,40 +724,149 @@ function topN(arr, n) {
 }
 
 // ============================================================
-// QR (qrious lib)
+// QR via API serveur (api.qrserver.com) — plus fiable que QRious.js
 // ============================================================
 function loadQR(canvasId, url) {
-  if (window.QRious) {
-    new QRious({ element: document.getElementById(canvasId), value: url, size: canvasId === "anim-qr" ? 240 : 180, foreground: "#002D69", background: "#FFFFFF" });
-    return;
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const size = canvasId === "anim-qr" ? 240 : 200;
+  const img = document.createElement("img");
+  img.width = size;
+  img.height = size;
+  img.alt = "QR code participant";
+  img.style.borderRadius = "6px";
+  img.style.display = "block";
+  // 2 services en cascade pour fallback
+  const primary = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&ecc=M&margin=0&color=002D69&bgcolor=FFFFFF&data=${encodeURIComponent(url)}`;
+  const fallback = `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encodeURIComponent(url)}&chld=M|0&chco=002D69`;
+  img.onerror = () => { img.onerror = null; img.src = fallback; };
+  img.src = primary;
+  canvas.parentNode.replaceChild(img, canvas);
+}
+
+// ============================================================
+// CONTRÔLES SÉVERINE (barre intégrée dans la projection)
+// ============================================================
+async function resetSession() {
+  if (!confirm("Effacer toute la session (joueurs, réponses, scores) ?")) return;
+  await fbDelete(BASE);
+  location.reload();
+}
+
+// Retour au lobby (garde les joueurs, efface les réponses + state)
+async function backToLobby() {
+  if (!confirm("Revenir à l'accueil ? Les joueurs restent connectés, les réponses sont effacées.")) return;
+  await fbDelete(BASE + "/answers");
+  await fbPut(BASE + "/state", { phase: "lobby" });
+  projLastRender = "";
+  lastBeepSec = -1;
+}
+
+// Question précédente
+async function prevQuestion(currentIdx) {
+  if (currentIdx <= 0) return;
+  await fbDelete(BASE + `/answers/q${currentIdx - 1}`);
+  await launchQuestion(currentIdx - 1);
+}
+
+// Relancer la question actuelle (efface les réponses)
+async function relaunchQuestion(idx) {
+  if (!confirm("Relancer cette question ? Les réponses déjà reçues seront effacées.")) return;
+  await fbDelete(BASE + `/answers/q${idx}`);
+  await launchQuestion(idx);
+}
+
+function renderControlBar(state, pcount, ansCount) {
+  const bar = document.getElementById("ctrl-bar");
+  if (!bar) return;
+  bar.classList.remove("hidden");
+
+  // Boutons nav (toujours dispo sauf en lobby) : accueil + question précédente
+  const navHome = `<button class="ctrl-btn secondary small" id="cb-home" title="Revenir à l'accueil">🏠</button>`;
+  const navPrev = (state.q_idx > 0)
+    ? `<button class="ctrl-btn secondary small" id="cb-prev" title="Question précédente">◀</button>`
+    : `<button class="ctrl-btn secondary small" disabled title="Pas de question précédente">◀</button>`;
+
+  if (state.phase === "lobby") {
+    if (pcount === 0) {
+      bar.innerHTML = `
+        <span class="ctrl-msg">En attente du 1er joueur…</span>
+        <button class="ctrl-btn" id="cb-start" disabled>▶ Lancer la 1ère question</button>
+        <button class="ctrl-btn danger" id="cb-reset">RAZ</button>`;
+    } else {
+      bar.innerHTML = `
+        <span class="ctrl-msg">${pcount} joueur${pcount>1?'s':''} prêt${pcount>1?'s':''}</span>
+        <button class="ctrl-btn" id="cb-start">▶ Lancer la 1ère question</button>
+        <button class="ctrl-btn danger" id="cb-reset">RAZ</button>`;
+      document.getElementById("cb-start").addEventListener("click", () => launchQuestion(0));
+    }
+    document.getElementById("cb-reset").addEventListener("click", resetSession);
   }
-  const s = document.createElement("script");
-  s.src = "https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js";
-  s.onload = () => { new QRious({ element: document.getElementById(canvasId), value: url, size: canvasId === "anim-qr" ? 240 : 180, foreground: "#002D69", background: "#FFFFFF" }); };
-  document.head.appendChild(s);
+  else if (state.phase === "question") {
+    bar.innerHTML = `
+      ${navHome}
+      ${navPrev}
+      <span class="ctrl-msg">Q${state.q_idx + 1}/${QUESTIONS.length} · ${ansCount}/${pcount} ont répondu</span>
+      <button class="ctrl-btn secondary small" id="cb-relaunch" title="Relancer cette question">🔄</button>
+      <button class="ctrl-btn" id="cb-close">Clore et afficher le podium</button>`;
+    document.getElementById("cb-home").addEventListener("click", backToLobby);
+    document.getElementById("cb-prev").addEventListener("click", () => prevQuestion(state.q_idx));
+    document.getElementById("cb-relaunch").addEventListener("click", () => relaunchQuestion(state.q_idx));
+    document.getElementById("cb-close").addEventListener("click", closeQuestion);
+  }
+  else if (state.phase === "result") {
+    const isLast = state.q_idx >= QUESTIONS.length - 1;
+    bar.innerHTML = `
+      ${navHome}
+      ${navPrev}
+      <button class="ctrl-btn secondary small" id="cb-relaunch" title="Relancer cette question">🔄</button>
+      <span class="ctrl-msg">Q${state.q_idx+1}/${QUESTIONS.length} terminée</span>
+      ${isLast
+        ? `<button class="ctrl-btn" id="cb-next">🏆 Podium FINAL</button>`
+        : `<button class="ctrl-btn" id="cb-next">Suivante ▶ (${state.q_idx + 2}/${QUESTIONS.length})</button>`}`;
+    document.getElementById("cb-home").addEventListener("click", backToLobby);
+    document.getElementById("cb-prev").addEventListener("click", () => prevQuestion(state.q_idx));
+    document.getElementById("cb-relaunch").addEventListener("click", () => relaunchQuestion(state.q_idx));
+    document.getElementById("cb-next").addEventListener("click", async () => {
+      if (isLast) await fbPut(BASE + "/state", { phase: "end", q_idx: state.q_idx });
+      else await launchQuestion(state.q_idx + 1);
+    });
+  }
+  else if (state.phase === "end") {
+    bar.innerHTML = `
+      ${navHome}
+      <span class="ctrl-msg">🎉 Quiz terminé</span>
+      <button class="ctrl-btn" id="cb-back">↩ Revoir le podium par question</button>
+      <button class="ctrl-btn danger" id="cb-reset">Nouvelle session</button>`;
+    document.getElementById("cb-home").addEventListener("click", backToLobby);
+    document.getElementById("cb-back").addEventListener("click", async () => {
+      await fbPut(BASE + "/state", { phase: "result", q_idx: state.q_idx });
+    });
+    document.getElementById("cb-reset").addEventListener("click", resetSession);
+  }
 }
 
 // ============================================================
-// ANIMATEUR
+// LOGIQUE QUESTION : countdown sonore + auto-close (avant : dans refreshAnim, maintenant : dans renderProj)
 // ============================================================
-async function initAnimator() {
-  const playUrl = location.origin + location.pathname + "#play";
-  document.getElementById("anim-url").textContent = playUrl;
-  document.getElementById("anim-url-short").textContent = playUrl;
-  loadQR("anim-qr", playUrl);
-
-  // RAZ button
-  document.getElementById("reset-btn").addEventListener("click", async () => {
-    if (!confirm("Effacer toute la session (joueurs, réponses, scores) ?")) return;
-    await fbDelete(BASE);
-    location.reload();
-  });
-
-  // Polling régulier
-  setInterval(refreshAnim, 1000);
-  refreshAnim();
+function tickQuestionSounds(state) {
+  if (state.phase !== "question") return;
+  const elapsed = Date.now() - state.q_started_at;
+  const remaining = Math.max(0, QUESTION_DURATION - elapsed);
+  const remSec = Math.ceil(remaining / 1000);
+  if (remSec > 0 && remSec <= 10 && remSec !== lastBeepSec) {
+    lastBeepSec = remSec;
+    playBeep(remSec <= 3);
+  }
+  if (remaining <= 0 && !state.auto_closing) {
+    fbPatch(BASE + "/state", { auto_closing: true }).then(() => {
+      playFinalBuzz();
+      setTimeout(() => closeQuestion(), 400);
+    });
+  }
 }
 
+// Stub pour ne pas casser : refreshAnim n'est plus utilisé
 async function refreshAnim() {
   const all = await fbGet(BASE) || {};
   const players = all.players || {};
@@ -861,6 +956,7 @@ async function refreshAnim() {
 
 async function launchQuestion(idx) {
   lastBeepSec = -1;
+  projLastRender = "";
   await fbPut(BASE + "/state", {
     phase: "question",
     q_idx: idx,
@@ -1082,8 +1178,16 @@ async function renderProj() {
   const all = await fbGet(BASE) || {};
   const players = all.players || {};
   const state = all.state || { phase: "lobby" };
+  const answers = all.answers || {};
   const container = document.getElementById("proj-content");
   const pcount = Object.keys(players).length;
+  const ansCount = state.phase === "question"
+    ? Object.keys(answers[`q${state.q_idx}`] || {}).length
+    : 0;
+
+  // Barre de contrôle Séverine + countdown sonore + auto-close
+  renderControlBar(state, pcount, ansCount);
+  tickQuestionSounds(state);
 
   if (state.phase === "lobby") {
     const sig = `lobby-${pcount}`;
@@ -1163,20 +1267,54 @@ async function renderProj() {
     const allScores = computeAllScores(all);
     const top3G = topN(allScores, 3);
 
+    const top3QHtml = top3Q.length === 0
+      ? `<div style="text-align:center;padding:30px 20px;background:#fff;border-radius:16px;border:2px dashed var(--orange);margin:14px 0">
+           <div style="font-size:42px;margin-bottom:6px">🙈</div>
+           <div style="color:var(--navy);font-family:'Playfair Display',serif;font-style:italic;font-size:22px;margin-bottom:4px">Personne n'a trouvé !</div>
+           <div style="color:var(--grey);font-size:14px">${Object.keys(ansAll).length} réponse${Object.keys(ansAll).length>1?'s':''} reçue${Object.keys(ansAll).length>1?'s':''}, mais aucune juste.</div>
+         </div>`
+      : renderPodium(top3Q);
+
+    // Stats par réponse : combien ont voté pour chaque choix
+    const counts = [0,0,0,0];
+    Object.values(ansAll).forEach(a => { if (a.answer >= 0 && a.answer < 4) counts[a.answer]++; });
+    const totalAns = counts.reduce((s,c) => s+c, 0);
+    const maxC = Math.max(1, ...counts);
+    const letters = ["A","B","C","D"];
+    const choicesHtml = q.opts.map((opt, i) => {
+      const c = counts[i];
+      const pct = totalAns > 0 ? Math.round(c / totalAns * 100) : 0;
+      const isCorrect = i === q.correct;
+      return `
+        <div class="ans-row ${isCorrect ? 'correct' : ''}">
+          <div class="ans-letter">${letters[i]}${isCorrect ? '<span class="ans-check">✓</span>' : ''}</div>
+          <div class="ans-content">
+            <div class="ans-text">${escapeHtml(opt)}</div>
+            <div class="ans-bar-wrap">
+              <div class="ans-bar" style="width:${pct}%"></div>
+            </div>
+          </div>
+          <div class="ans-stat"><b>${c}</b><span>vote${c>1?'s':''} · ${pct}%</span></div>
+        </div>`;
+    }).join("");
+
     container.innerHTML = `
       <div class="podium-section">
         <h2>Réponse : <span class="accent">${escapeHtml(q.opts[q.correct])}</span></h2>
+        <div class="answers-stats">
+          ${choicesHtml}
+        </div>
       </div>
       <div class="results-2col">
         <div>
           <div class="podium-section" style="margin-top:0">
-            <h2 style="font-size:28px">🏆 Top 3 de la question</h2>
-            ${renderPodium(top3Q)}
+            <h2 style="font-size:26px">🏆 Top 3 de la question</h2>
+            ${top3QHtml}
           </div>
         </div>
         <div>
           <div class="podium-section" style="margin-top:0">
-            <h2 style="font-size:28px">⭐ Top 3 général</h2>
+            <h2 style="font-size:26px">⭐ Top 3 général</h2>
             ${renderPodium(top3G)}
           </div>
         </div>
