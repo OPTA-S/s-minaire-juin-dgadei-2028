@@ -19,7 +19,7 @@
      ============================================================ -->
 
 <script>
-const APP_VERSION = "2026-06-30-v8-qr-api";
+const APP_VERSION = "2026-06-30-v9-qr-query";
 const FB_URL = "https://dga-dei-juin-default-rtdb.europe-west1.firebasedatabase.app";
 const SESSION = "medef-nouvelle-economie";
 const BASE = `/sessions/${SESSION}`;
@@ -601,9 +601,11 @@ async function fbDelete(path) {
 }
 
 // ============================================================
-// ROUTAGE — une seule vue : projection (avec contrôles intégrés pour Séverine)
+// ROUTAGE — supporte ?play=1 (préféré, scannable par iPhone) ET #play (legacy)
 // ============================================================
-const route = (location.hash || "").replace("#","");
+const _params = new URLSearchParams(location.search);
+const route = (_params.get("play") === "1" || location.hash.replace("#","") === "play")
+  ? "play" : "";
 
 if (route === "play") {
   document.getElementById("play-view").classList.remove("hidden");
@@ -724,21 +726,22 @@ function topN(arr, n) {
 }
 
 // ============================================================
-// QR via API serveur (api.qrserver.com) — plus fiable que QRious.js
+// QR via API serveur (api.qrserver.com)
+// Noir pur (iPhone exige), marge de silence, ECC élevé pour robustesse
 // ============================================================
 function loadQR(canvasId, url) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
-  const size = canvasId === "anim-qr" ? 240 : 200;
+  const size = canvasId === "anim-qr" ? 260 : 240;
   const img = document.createElement("img");
   img.width = size;
   img.height = size;
   img.alt = "QR code participant";
   img.style.borderRadius = "6px";
   img.style.display = "block";
-  // 2 services en cascade pour fallback
-  const primary = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&ecc=M&margin=0&color=002D69&bgcolor=FFFFFF&data=${encodeURIComponent(url)}`;
-  const fallback = `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encodeURIComponent(url)}&chld=M|0&chco=002D69`;
+  // Noir pur (000000) + marge 2 + ECC Q (correction d'erreur élevée) → iPhone-friendly
+  const primary = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&ecc=Q&margin=2&color=000000&bgcolor=FFFFFF&data=${encodeURIComponent(url)}`;
+  const fallback = `https://chart.googleapis.com/chart?cht=qr&chs=${size}x${size}&chl=${encodeURIComponent(url)}&chld=Q|2`;
   img.onerror = () => { img.onerror = null; img.src = fallback; };
   img.src = primary;
   canvas.parentNode.replaceChild(img, canvas);
@@ -1165,7 +1168,7 @@ async function renderPlayer() {
 // PROJECTION
 // ============================================================
 async function initProjection() {
-  const playUrl = location.origin + location.pathname + "#play";
+  const playUrl = location.origin + location.pathname + "?play=1";
   document.getElementById("proj-url").textContent = playUrl;
   loadQR("proj-qr", playUrl);
   setInterval(renderProj, 1000);
