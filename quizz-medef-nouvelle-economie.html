@@ -19,7 +19,7 @@
      ============================================================ -->
 
 <script>
-const APP_VERSION = "2026-06-30-v9-qr-query";
+const APP_VERSION = "2026-06-30-v10-audit";
 const FB_URL = "https://dga-dei-juin-default-rtdb.europe-west1.firebasedatabase.app";
 const SESSION = "medef-nouvelle-economie";
 const BASE = `/sessions/${SESSION}`;
@@ -779,73 +779,81 @@ async function relaunchQuestion(idx) {
   await launchQuestion(idx);
 }
 
+// Helper protégé : attache un listener sans planter si l'élément n'existe pas
+function on(id, handler) {
+  const el = document.getElementById(id);
+  if (el && !el.disabled) el.addEventListener("click", handler);
+}
+
 function renderControlBar(state, pcount, ansCount) {
   const bar = document.getElementById("ctrl-bar");
   if (!bar) return;
   bar.classList.remove("hidden");
 
-  // Boutons nav (toujours dispo sauf en lobby) : accueil + question précédente
+  // Boutons nav avec id systématique (disabled ne supprime pas l'id)
   const navHome = `<button class="ctrl-btn secondary small" id="cb-home" title="Revenir à l'accueil">🏠</button>`;
-  const navPrev = (state.q_idx > 0)
-    ? `<button class="ctrl-btn secondary small" id="cb-prev" title="Question précédente">◀</button>`
-    : `<button class="ctrl-btn secondary small" disabled title="Pas de question précédente">◀</button>`;
+  const navPrev = `<button class="ctrl-btn secondary small" id="cb-prev" ${(state.q_idx||0) > 0 ? '' : 'disabled'} title="Question précédente">◀</button>`;
 
-  if (state.phase === "lobby") {
-    if (pcount === 0) {
-      bar.innerHTML = `
-        <span class="ctrl-msg">En attente du 1er joueur…</span>
-        <button class="ctrl-btn" id="cb-start" disabled>▶ Lancer la 1ère question</button>
-        <button class="ctrl-btn danger" id="cb-reset">RAZ</button>`;
-    } else {
-      bar.innerHTML = `
-        <span class="ctrl-msg">${pcount} joueur${pcount>1?'s':''} prêt${pcount>1?'s':''}</span>
-        <button class="ctrl-btn" id="cb-start">▶ Lancer la 1ère question</button>
-        <button class="ctrl-btn danger" id="cb-reset">RAZ</button>`;
-      document.getElementById("cb-start").addEventListener("click", () => launchQuestion(0));
+  try {
+    if (state.phase === "lobby") {
+      if (pcount === 0) {
+        bar.innerHTML = `
+          <span class="ctrl-msg">En attente du 1er joueur…</span>
+          <button class="ctrl-btn" id="cb-start" disabled>▶ Lancer la 1ère question</button>
+          <button class="ctrl-btn danger" id="cb-reset">RAZ</button>`;
+      } else {
+        bar.innerHTML = `
+          <span class="ctrl-msg">${pcount} joueur${pcount>1?'s':''} prêt${pcount>1?'s':''}</span>
+          <button class="ctrl-btn" id="cb-start">▶ Lancer la 1ère question</button>
+          <button class="ctrl-btn danger" id="cb-reset">RAZ</button>`;
+      }
+      on("cb-start", () => launchQuestion(0));
+      on("cb-reset", resetSession);
     }
-    document.getElementById("cb-reset").addEventListener("click", resetSession);
-  }
-  else if (state.phase === "question") {
-    bar.innerHTML = `
-      ${navHome}
-      ${navPrev}
-      <span class="ctrl-msg">Q${state.q_idx + 1}/${QUESTIONS.length} · ${ansCount}/${pcount} ont répondu</span>
-      <button class="ctrl-btn secondary small" id="cb-relaunch" title="Relancer cette question">🔄</button>
-      <button class="ctrl-btn" id="cb-close">Clore et afficher le podium</button>`;
-    document.getElementById("cb-home").addEventListener("click", backToLobby);
-    document.getElementById("cb-prev").addEventListener("click", () => prevQuestion(state.q_idx));
-    document.getElementById("cb-relaunch").addEventListener("click", () => relaunchQuestion(state.q_idx));
-    document.getElementById("cb-close").addEventListener("click", closeQuestion);
-  }
-  else if (state.phase === "result") {
-    const isLast = state.q_idx >= QUESTIONS.length - 1;
-    bar.innerHTML = `
-      ${navHome}
-      ${navPrev}
-      <button class="ctrl-btn secondary small" id="cb-relaunch" title="Relancer cette question">🔄</button>
-      <span class="ctrl-msg">Q${state.q_idx+1}/${QUESTIONS.length} terminée</span>
-      ${isLast
-        ? `<button class="ctrl-btn" id="cb-next">🏆 Podium FINAL</button>`
-        : `<button class="ctrl-btn" id="cb-next">Suivante ▶ (${state.q_idx + 2}/${QUESTIONS.length})</button>`}`;
-    document.getElementById("cb-home").addEventListener("click", backToLobby);
-    document.getElementById("cb-prev").addEventListener("click", () => prevQuestion(state.q_idx));
-    document.getElementById("cb-relaunch").addEventListener("click", () => relaunchQuestion(state.q_idx));
-    document.getElementById("cb-next").addEventListener("click", async () => {
-      if (isLast) await fbPut(BASE + "/state", { phase: "end", q_idx: state.q_idx });
-      else await launchQuestion(state.q_idx + 1);
-    });
-  }
-  else if (state.phase === "end") {
-    bar.innerHTML = `
-      ${navHome}
-      <span class="ctrl-msg">🎉 Quiz terminé</span>
-      <button class="ctrl-btn" id="cb-back">↩ Revoir le podium par question</button>
-      <button class="ctrl-btn danger" id="cb-reset">Nouvelle session</button>`;
-    document.getElementById("cb-home").addEventListener("click", backToLobby);
-    document.getElementById("cb-back").addEventListener("click", async () => {
-      await fbPut(BASE + "/state", { phase: "result", q_idx: state.q_idx });
-    });
-    document.getElementById("cb-reset").addEventListener("click", resetSession);
+    else if (state.phase === "question") {
+      bar.innerHTML = `
+        ${navHome}
+        ${navPrev}
+        <span class="ctrl-msg">Q${state.q_idx + 1}/${QUESTIONS.length} · ${ansCount}/${pcount} ont répondu</span>
+        <button class="ctrl-btn secondary small" id="cb-relaunch" title="Relancer cette question">🔄</button>
+        <button class="ctrl-btn" id="cb-close">Clore et afficher le podium</button>`;
+      on("cb-home", backToLobby);
+      on("cb-prev", () => prevQuestion(state.q_idx));
+      on("cb-relaunch", () => relaunchQuestion(state.q_idx));
+      on("cb-close", closeQuestion);
+    }
+    else if (state.phase === "result") {
+      const isLast = state.q_idx >= QUESTIONS.length - 1;
+      bar.innerHTML = `
+        ${navHome}
+        ${navPrev}
+        <button class="ctrl-btn secondary small" id="cb-relaunch" title="Relancer cette question">🔄</button>
+        <span class="ctrl-msg">Q${state.q_idx+1}/${QUESTIONS.length} terminée</span>
+        ${isLast
+          ? `<button class="ctrl-btn" id="cb-next">🏆 Podium FINAL</button>`
+          : `<button class="ctrl-btn" id="cb-next">Suivante ▶ (${state.q_idx + 2}/${QUESTIONS.length})</button>`}`;
+      on("cb-home", backToLobby);
+      on("cb-prev", () => prevQuestion(state.q_idx));
+      on("cb-relaunch", () => relaunchQuestion(state.q_idx));
+      on("cb-next", async () => {
+        if (isLast) await fbPut(BASE + "/state", { phase: "end", q_idx: state.q_idx });
+        else await launchQuestion(state.q_idx + 1);
+      });
+    }
+    else if (state.phase === "end") {
+      bar.innerHTML = `
+        ${navHome}
+        <span class="ctrl-msg">🎉 Quiz terminé</span>
+        <button class="ctrl-btn" id="cb-back">↩ Revoir le podium par question</button>
+        <button class="ctrl-btn danger" id="cb-reset">Nouvelle session</button>`;
+      on("cb-home", backToLobby);
+      on("cb-back", async () => {
+        await fbPut(BASE + "/state", { phase: "result", q_idx: state.q_idx });
+      });
+      on("cb-reset", resetSession);
+    }
+  } catch(e) {
+    console.error("[quiz] renderControlBar error", e);
   }
 }
 
