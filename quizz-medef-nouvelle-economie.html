@@ -3,14 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Quiz Nouvelle Économie — MEDEF Réunion</title>
+<title>Quiz Nouvelle Économie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <!-- ============================================================
-     QUIZ NOUVELLE ÉCONOMIE — Atelier MEDEF Réunion
-     Animation : Séverine NIRLO
+     QUIZ NOUVELLE ÉCONOMIE — atelier interactif
      ------------------------------------------------------------
      Routes :
        (défaut)  → animateur
@@ -19,7 +18,7 @@
      ============================================================ -->
 
 <script>
-const APP_VERSION = "2026-06-30-v10-audit";
+const APP_VERSION = "2026-06-30-v11-neutre";
 const FB_URL = "https://dga-dei-juin-default-rtdb.europe-west1.firebasedatabase.app";
 const SESSION = "medef-nouvelle-economie";
 const BASE = `/sessions/${SESSION}`;
@@ -536,7 +535,7 @@ button{font-family:inherit;cursor:pointer;border:0}
     <div class="play-hero">
       <div style="font-size:38px">🎯</div>
       <h1>Quiz Nouvelle Économie</h1>
-      <div class="sub">MEDEF Réunion · animé par Séverine NIRLO</div>
+      <div class="sub">Quiz interactif</div>
     </div>
 
     <div id="play-content"><!-- géré par JS --></div>
@@ -551,7 +550,7 @@ button{font-family:inherit;cursor:pointer;border:0}
     <div class="proj-header">
       <div>
         <h1>Quiz Nouvelle Économie</h1>
-        <div class="sub">MEDEF Réunion · animé par Séverine NIRLO</div>
+        <div class="sub">Quiz interactif</div>
       </div>
       <div class="proj-qr">
         <div class="lbl">REJOINDRE</div>
@@ -1344,13 +1343,13 @@ async function renderProj() {
     container.innerHTML = `
       <div class="end-screen">
         <h1>🎉 Bravo !</h1>
-        <p>Voici le podium final de cet atelier MEDEF</p>
+        <p>Voici le podium final</p>
       </div>
       <div class="podium-section">
         ${renderPodium(top3)}
       </div>
       <div class="end-screen" style="padding-top:30px">
-        <p style="color:var(--grey-l);font-style:italic;font-size:18px">Merci à toutes et tous · OPTA-S × MEDEF Réunion</p>
+        <p style="color:var(--grey-l);font-style:italic;font-size:18px">Merci à toutes et tous · OPTA-S</p>
       </div>`;
   }
 }
